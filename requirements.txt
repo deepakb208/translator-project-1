@@ -1,0 +1,15 @@
+boto3
+pydub
+google-cloud-texttospeech
+google-auth
+moviepy
+python-docx
+imageio
+imageio-ffmpeg
+docx
+pillow
+gtts
+opencv-python
+simpleaudio
+audioread
+jupyter
