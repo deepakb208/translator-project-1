@@ -191,8 +191,11 @@ def get_audio_duration(file_path):
 
 # Convert text to speech and create video with synced text images
 def text_to_speech_to_video(text, video_text, chapter_number, output_dir):
+    # print(video_text)
     verses = split_text(text)
+    print('Verses length: ', len(verses))
     video_verses = split_video_text(video_text)
+    print('Video verses length: ', len(video_verses))
     # count = 5
     
     temp_audio_dir = os.path.join(output_dir, f"temp_audio_chunks_chapter_{chapter_number}")
@@ -249,11 +252,13 @@ def process_text_file(text_file, docx_file, output_dir):
     video_text = '\n'.join([para.text for para in document.paragraphs])
     chapters = text.split('CHAPTER ')
     video_chapters = video_text.split('CHAPTER ')
-    chapters_list = [chapters[1]]
+    chapter_start = 6
+    chapter_end = 22
+    chapters_list = chapters[chapter_start:chapter_end+1]
     for i, chapter in enumerate(chapters_list):
         chapter_number = chapter.split('\n')[0].strip()
         chapter_text = 'CHAPTER ' + chapter
-        video_chapter_text = 'CHAPTER ' + video_chapters[i+1]
+        video_chapter_text = 'CHAPTER ' + video_chapters[chapter_start+i]
         print(f'Processing Chapter {chapter_number}')
         text_to_speech_to_video(chapter_text, video_chapter_text, chapter_number, output_dir)
 
