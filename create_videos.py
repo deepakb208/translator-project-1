@@ -200,7 +200,7 @@ def get_audio_duration(file_path):
         return f.duration
 
 # Convert text to speech and create video with synced text images
-def text_to_speech_to_video(text, video_text, chapter_number, output_dir, voice_name='en-IN-Standard-B'):
+def text_to_speech_to_video(text, video_text, chapter_number, output_dir, voice_name='en-IN-Standard-B', speaking_rate=0.7):
     # print(video_text)
     verses = split_text(text)
     print('Verses length: ', len(verses))
@@ -217,9 +217,9 @@ def text_to_speech_to_video(text, video_text, chapter_number, output_dir, voice_
     image_files = []
     total_duration = 0
     
-    for i, verse in enumerate(verses):
+    for i, verse in enumerate(verses[:count]):
         verse_audio_file = os.path.join(temp_audio_dir, f"verse_{i}.mp3")
-        synthesize_speech(verse, verse_audio_file, voice_name)
+        synthesize_speech(verse, verse_audio_file, voice_name, speaking_rate)
         audio_files.append(verse_audio_file)
         
         duration = get_audio_duration(verse_audio_file)
@@ -254,7 +254,7 @@ def text_to_speech_to_video(text, video_text, chapter_number, output_dir, voice_
     shutil.rmtree(temp_audio_dir)
     shutil.rmtree(temp_image_dir)
 
-def process_text_file(text_file, docx_file, output_dir, voice_name):
+def process_text_file(text_file, docx_file, output_dir, voice_name, speaking_rate):
     with open(text_file, 'r') as file:
         text = file.read()
     
@@ -270,16 +270,17 @@ def process_text_file(text_file, docx_file, output_dir, voice_name):
         chapter_text = 'CHAPTER ' + chapter
         video_chapter_text = 'CHAPTER ' + video_chapters[chapter_start+i]
         print(f'Processing Chapter {chapter_number}')
-        text_to_speech_to_video(chapter_text, video_chapter_text, chapter_number, output_dir, voice_name)
+        text_to_speech_to_video(chapter_text, video_chapter_text, chapter_number, output_dir, voice_name, speaking_rate)
 
 if __name__ == "__main__":
     # text_file = 'input/tripura_rahasya_english_final/tripura_rahasya_english_final.txt'
     text_file = 'input/tripura_rahasya_english_final/tripura_rahasya_sanskrit_final.txt'
     docx_file = 'input/tripura_rahasya_english_final/tripura_rahasya_english_final_video_text.docx'
     output_dir = 'output_videos/sanskrit'
-    voice_name = 'hi-IN-Wavenet-B'
+    voice_name = 'kn-IN-Wavenet-B'
+    speaking_rate = 0.6
     # voice_name = 'en-IN-Standard-B'
     # list_available_voices()
     os.makedirs(output_dir, exist_ok=True)
-    process_text_file(text_file, docx_file, output_dir, voice_name)
+    process_text_file(text_file, docx_file, output_dir, voice_name, speaking_rate)
     print(f'Videos saved in {output_dir}')

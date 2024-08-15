@@ -13,3 +13,4 @@ opencv-python
 simpleaudio
 audioread
 jupyter
+sanskrit_tts
