@@ -8,6 +8,8 @@ from moviepy.editor import *
 from google.cloud import texttospeech
 import re
 from sanskrit_tts import default_tts
+from googletrans import Translator
+from indic_transliteration import sanscript
 
 def list_available_voices():
     client = texttospeech.TextToSpeechClient()
@@ -17,11 +19,38 @@ def list_available_voices():
         print(f"Name: {voice.name}, Language Codes: {', '.join(voice.language_codes)}")
 
 # Initialize Google Text-to-Speech client
-def synthesize_speech(text, output_file, voice_name="en-IN-Standard-B", speaking_rate=0.7):
+def synthesize_speech_sanskrit_tts(text, output_file, voice_name="en-IN-Standard-B", speaking_rate=0.7):
     TTS = default_tts()
     audio = TTS.synthesize(text)
     audio.export(output_file)
     print(f'Audio content written to file {output_file}')
+    
+def synthesize_speech(text, output_file, voice_name="kn-IN-Standard-B", speaking_rate=0.7):
+   # Transliterate from Devanagari (Sanskrit) to Kannada
+    transliterated_text = sanscript.transliterate(text, sanscript.DEVANAGARI, sanscript.KANNADA)
+    
+    # Log the transliteration
+    print(f'Translated text (Kannada): {transliterated_text}')
+    
+    client = texttospeech.TextToSpeechClient()
+    synthesis_input = texttospeech.SynthesisInput(text=transliterated_text)
+    match = re.match(r"([a-z]{2}-[A-Z]{2})", voice_name)
+    language_code = match.group(1) if match else None
+    voice = texttospeech.VoiceSelectionParams(
+        language_code=language_code,
+        name=voice_name,
+    )
+    audio_config = texttospeech.AudioConfig(
+        audio_encoding=texttospeech.AudioEncoding.MP3,
+        speaking_rate=speaking_rate  # Use the speaking rate parameter
+    )
+    response = client.synthesize_speech(
+        input=synthesis_input, voice=voice, audio_config=audio_config
+    )
+    with open(output_file, 'wb') as file:
+        file.write(response.audio_content)
+    print(f'Audio content written to file {output_file}')
+
 
 # Split text into smaller chunks for TTS processing
 def split_text(text):
@@ -265,7 +294,7 @@ if __name__ == "__main__":
     docx_file = 'input/tripura_rahasya_english_final/tripura_rahasya_english_final_video_text.docx'
     output_dir = 'output_videos/sanskrit'
     voice_name = 'kn-IN-Wavenet-B'
-    speaking_rate = 0.6
+    speaking_rate = 0.7
     # voice_name = 'en-IN-Standard-B'
     # list_available_voices()
     os.makedirs(output_dir, exist_ok=True)
